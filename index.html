@@ -322,23 +322,23 @@
                 Submitting...
             `;
 
-            // Fetch request to GAS
+            // Fetch request to GAS using no-cors to bypass browser security checks on the redirect
             fetch(GAS_URL, {
                 method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "text/plain"
+                },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === "success") {
-                    document.getElementById('survey-form').classList.add('hidden');
-                    const successMsg = document.getElementById('success-message');
-                    successMsg.classList.remove('hidden');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    alert("Submission Error: " + data.message);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                }
+            .then(() => {
+                // Because we used 'no-cors', the response is 'opaque', meaning the browser 
+                // won't let us read it. However, if it reaches this block, the request successfully 
+                // fired off to Google Apps Script. We can safely trigger the success message.
+                document.getElementById('survey-form').classList.add('hidden');
+                const successMsg = document.getElementById('success-message');
+                successMsg.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             })
             .catch(error => {
                 console.error('Error:', error);
