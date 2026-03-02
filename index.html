@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Asia-Pacific Consensus on Professional Standards for Effective Medical Visualization</title>
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom smooth transition for comment boxes */
+        .comment-box {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .comment-box.show {
+            max-height: 150px;
+            opacity: 1;
+        }
+        /* Custom radio scaling */
+        .rating-badge {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-[#faf9f9] min-h-screen py-10 px-4 sm:px-6 lg:px-8 font-sans text-gray-800 selection:bg-[#DA8484] selection:text-white">
+
+    <div class="max-w-3xl mx-auto space-y-8" id="app-container">
+        
+        <!-- Header & Instructions -->
+        <div class="bg-white rounded-xl shadow-sm border-t-4 border-[#DA8484] overflow-hidden">
+            <div class="p-8 sm:p-10">
+                <h1 class="text-2xl sm:text-3xl font-light text-gray-900 mb-3 leading-tight tracking-wide">
+                    The 2026 Asia-Pacific Consensus on Professional Standards for Effective Medical Visualization
+                </h1>
+                <p class="text-lg text-[#8B8080] font-medium mb-8">
+                    (modified Delphi Round 1)
+                </p>
+                
+                <div class="bg-gray-50 rounded-lg p-6 mb-8 text-sm sm:text-base border border-gray-100 text-[#555]">
+                    <p class="font-semibold text-gray-800 mb-2 uppercase tracking-wider text-sm">Instructions</p>
+                    <p class="mb-4">Please rate your agreement with each proposed guideline statement. Scale: 1 = Strongly Disagree, 5 = Strongly Agree.</p>
+                    <div class="flex items-start gap-3 bg-white p-4 border border-gray-200 rounded-md">
+                        <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-[#DA8484]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-sm">Optional comment: If you rate 1–2, you may add a short note (e.g., unclear / too strict / not feasible / needs definition / belongs in advanced tier).</p>
+                    </div>
+                </div>
+
+                <div class="text-sm text-[#8B8080] pt-4 border-t border-gray-100">
+                    <p class="font-semibold text-gray-700 mb-3 uppercase tracking-wider text-xs">GRADE scale definitions</p>
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                        <li><strong class="text-gray-700">High:</strong> large-scale RCTs</li>
+                        <li><strong class="text-gray-700">Moderate:</strong> research with some limitations</li>
+                        <li><strong class="text-gray-700">Low:</strong> observational studies</li>
+                        <li><strong class="text-gray-700">Very low:</strong> flawed and low confidence</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Survey Form -->
+        <form id="survey-form" class="space-y-8">
+            <div id="questions-container" class="space-y-8"></div>
+
+            <!-- Final Question -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-10">
+                <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-start gap-3">
+                    <svg class="w-5 h-5 text-[#DA8484] mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    Proposed Final Question: Is there any other professional standard, or ethical consideration we have missed that is essential for a 2026 consensus guideline?
+                </h2>
+                <textarea id="final-comment" class="w-full border-gray-200 rounded-lg shadow-sm focus:ring-[#DA8484] focus:border-[#DA8484] sm:text-base p-4 border bg-gray-50 min-h-[120px] transition-colors" placeholder="Enter any additional guidelines, standards, or ethical concerns..."></textarea>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden text-[#DA8484] font-medium text-center bg-[#DA8484]/10 p-4 rounded-lg border border-[#DA8484]/20">
+                Please answer all required questions.
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-center pt-4 pb-12">
+                <button type="submit" id="submit-btn" class="w-full sm:w-auto px-10 py-3.5 bg-[#DA8484] text-white font-medium rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DA8484] shadow-sm transition-all flex items-center justify-center gap-2 tracking-wide">
+                    <span>Submit Responses</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Success Message -->
+        <div id="success-message" class="hidden bg-white rounded-xl shadow-sm p-12 text-center border-t-4 border-[#DA8484]">
+            <svg class="w-20 h-20 text-[#DA8484] mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h2 class="text-2xl font-light text-gray-900 mb-3">Thank You!</h2>
+            <p class="text-[#8B8080] mb-8">Your responses for Round 1 of the Delphi consensus have been successfully recorded.</p>
+            <button onclick="window.location.reload()" class="px-8 py-2.5 border border-[#8B8080] text-[#8B8080] rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                Submit another response
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Form Submission URL mapped to your provided Google Apps Script
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz7WCLYRk180Rz3qGOvzi37-gtI4eJRy3g3jiZ72e2NR8TUnTwbCMIUDSnGgRPAwMIK/exec"; 
+        
+        // Survey Data
+        const surveyData = [
+            { section: "Section 1: Accuracy & Scientific Rigor", questions: [
+                { id: "q1", text: "Visualizations must prioritize scientific and anatomical accuracy over artistic license for surgical and professional education uses.", refs: "[1, 2, 5, 6]", grade: "High" },
+                { id: "q2", text: "Key visual claims should be traceable to source evidence such as imaging, operative records, primary literature, or SME input. Clinical-or patient-facing visuals must include an appropriate expert verification or sign-off step.", refs: "[1, 2, 7, 12]", grade: "High" },
+                { id: "q3", text: "Each deliverable must be clear to its intended audience, use context (e.g., bedside consent or simulation), and have a specific learning objective.", refs: "[1, 3]", grade: "High" },
+                { id: "q4", text: "Visuals that bridge scales (e.g., from gross anatomy to molecular/multiomics) must maintain biological consistency across transitions to ensure the viewer understands relationships across levels.", refs: "[3]", grade: "Low" },
+                { id: "q5", text: "When data is incomplete or predictive, the visual should use explicit conceptual flags or confidence language to communicate uncertainty.", refs: "[3, 7]", grade: "High" }
+            ]},
+            { section: "Section 2: Technique & Workflow", questions: [
+                { id: "q6", text: "The choice of medium, raster, vector, 3D, animation, or interactive, must be justified by the educational or clinical goal.", refs: "[1, 2, 3]", grade: "Moderate" },
+                { id: "q7", text: "Simplification is allowed but must not introduce clinically meaningful distortion or misleading implications.", refs: "[1, 2, 3, 5]", grade: "Moderate" },
+                { id: "q8", text: "Crisp and solid linework helps in delineating structures and therefore often considered more effective in depicting form than color and tone alone.", refs: "[1]", grade: "Low" },
+                { id: "q9", text: "Implement a standard workflow of brief approval, draft review, expert verification, and final quality assurance.", refs: "[7]", grade: "Moderate" },
+                { id: "q10", text: "Establish file practices to prevent outdated visuals from persisting in teaching materials, including revision tracking or version IDs.", refs: "[1, 2, 7]", grade: "Low" },
+                { id: "q11", text: "Any use of generative AI or deep learning must be disclosed, stating what is AI-generated versus human-curated.", refs: "[6, 7, 9]", grade: "High" }
+            ]},
+            { section: "Section 3: Accessibility", questions: [
+                { id: "q12", text: "Visuals must avoid color-only encoding by using redundant cues like patterns or labels and maintain high contrast for mobile and projection environments.", refs: "[3, 4, 10]", grade: "Moderate" },
+                { id: "q13", text: "Educational visuals should represent the diverse skin tones, body types, ages, and cultural contexts most relevant to the subject matter, to reduce bias in clinical training.", refs: "[6, 7, 14]", grade: "High" },
+                { id: "q14", text: "Patient-facing visuals should use plain-language labeling and rapid clarity design to support patients and improve health literacy.", refs: "[3, 5, 15]", grade: "High" }
+            ]},
+            { section: "Section 4: Disclosure & Ethics", questions: [
+                { id: "q15", text: "Patient-derived materials (e.g. DICOM files) must be strictly anonymized per institutional policies and appropriate for peer review or portfolio use.", refs: "[1]", grade: "High" },
+                { id: "q16", text: "Document the tools used, including software versions and key processing steps (e.g., Maya, ZBrush, or AI-integrated engines).", refs: "[1, 2]", grade: "Moderate" },
+                { id: "q17", text: "Disclose author contributions and any non-original assets (such as stock 3D models), including what was modified versus created.", refs: "[1, 13]", grade: "High" }
+            ]},
+            { section: "Section 5: Emerging Technology", questions: [
+                { id: "q18", text: "For visualizations serving as “Digital Twins,” the visual must clearly distinguish between patient-specific data and generalized biological models.", refs: "[7]", grade: "Low" },
+                { id: "q19", text: "Immersive Diagnostics (AR/VR/XR) overlays for surgical planning must maintain spatial accuracy relative to patient anatomy and explicitly state registration limits and safety boundaries.", refs: "[3]", grade: "Moderate" },
+                { id: "q20", text: "Visualizations integrated into simulators should document alignment between visual cues and haptic feedback to support procedural accuracy in training.", refs: "[7]", grade: "Very low" }
+            ]}
+        ];
+
+        // Store responses
+        const responses = {};
+        for (let i = 1; i <= 20; i++) {
+            responses[`q${i}`] = { score: null, comment: "" };
+        }
+
+        // Minimalist Grade Badge rendering
+        function getGradeBadge(grade) {
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide border border-gray-200 text-[#8B8080] uppercase bg-gray-50">GRADE: ${grade}</span>`;
+        }
+
+        // Render survey DOM
+        function renderSurvey() {
+            const container = document.getElementById('questions-container');
+            let html = "";
+            let globalQuestionIndex = 1;
+
+            surveyData.forEach(section => {
+                html += `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-8 py-5 border-b border-gray-200">
+                        <h2 class="text-xl font-medium text-gray-800 tracking-wide">${section.section}</h2>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                `;
+
+                section.questions.forEach(q => {
+                    html += `
+                        <div id="container-${q.id}" class="p-8 sm:p-10 transition-colors">
+                            <div class="mb-6">
+                                <p class="text-base text-gray-700 font-normal leading-relaxed">
+                                    <span class="text-[#8B8080] font-medium mr-2">${globalQuestionIndex}.</span>
+                                    ${q.text}
+                                </p>
+                                <div class="flex items-center gap-3 mt-4">
+                                    <span class="text-[11px] text-[#DA8484] font-mono border border-[#DA8484]/20 bg-[#DA8484]/5 px-2 py-0.5 rounded tracking-wide">${q.refs}</span>
+                                    ${getGradeBadge(q.grade)}
+                                </div>
+                            </div>
+
+                            <div class="mt-8">
+                                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full max-w-2xl mx-auto">
+                                    <span class="text-xs text-[#8B8080] hidden sm:block w-24 text-right uppercase tracking-wider">Strongly<br/>Disagree</span>
+                                    <div class="flex items-center justify-between w-full sm:w-auto gap-3 sm:gap-8">
+                                        <span class="text-[10px] text-[#8B8080] sm:hidden uppercase tracking-wider text-center">Strongly<br/>Disagree</span>
+                                        ${[1, 2, 3, 4, 5].map(val => `
+                                            <label class="flex flex-col items-center cursor-pointer group">
+                                                <div id="badge-${q.id}-${val}" class="rating-badge w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium bg-gray-50 text-gray-500 group-hover:bg-[#DA8484]/10 group-hover:text-[#DA8484] border border-gray-200">
+                                                    ${val}
+                                                </div>
+                                                <input type="radio" name="${q.id}" value="${val}" class="sr-only" onchange="handleRating('${q.id}', ${val})">
+                                            </label>
+                                        `).join('')}
+                                        <span class="text-[10px] text-[#8B8080] sm:hidden text-center uppercase tracking-wider">Strongly<br/>Agree</span>
+                                    </div>
+                                    <span class="text-xs text-[#8B8080] hidden sm:block w-24 uppercase tracking-wider">Strongly<br/>Agree</span>
+                                </div>
+                            </div>
+
+                            <!-- Comment Box -->
+                            <div id="comment-container-${q.id}" class="comment-box mt-6">
+                                <div class="pt-4 border-t border-gray-100">
+                                    <label id="comment-label-${q.id}" class="block text-sm font-medium text-gray-600 mb-2">
+                                        Optional Comment:
+                                    </label>
+                                    <textarea 
+                                        id="comment-${q.id}" 
+                                        class="w-full border-gray-200 rounded-lg shadow-sm focus:ring-[#DA8484] focus:border-[#DA8484] sm:text-sm p-3 border resize-none bg-gray-50 transition-colors" 
+                                        rows="2" 
+                                        placeholder="e.g., unclear, too strict, not feasible, needs definition..."
+                                        oninput="handleComment('${q.id}', this.value)"
+                                    ></textarea>
+                                </div>
+                            </div>
+                            
+                            <button type="button" id="btn-add-comment-${q.id}" onclick="forceShowComment('${q.id}')" class="mt-4 text-sm text-[#8B8080] hover:text-[#DA8484] font-medium transition-colors hidden flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                Add optional comment
+                            </button>
+                        </div>
+                    `;
+                    globalQuestionIndex++;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Handle rating clicks
+        window.handleRating = function(qId, val) {
+            responses[qId].score = val;
+            
+            // Update UI Styles
+            for (let i = 1; i <= 5; i++) {
+                const badge = document.getElementById(`badge-${qId}-${i}`);
+                if (i === val) {
+                    badge.className = "rating-badge w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium bg-[#DA8484] text-white shadow-md transform scale-110 border-transparent";
+                } else {
+                    badge.className = "rating-badge w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium bg-gray-50 text-gray-500 hover:bg-[#DA8484]/10 hover:text-[#DA8484] border border-gray-200";
+                }
+            }
+
+            // Remove error highlight if exists
+            document.getElementById(`container-${qId}`).classList.remove('bg-[#DA8484]/5');
+
+            // Handle Comment Box display logic
+            const commentContainer = document.getElementById(`comment-container-${qId}`);
+            const label = document.getElementById(`comment-label-${qId}`);
+            const addBtn = document.getElementById(`btn-add-comment-${qId}`);
+
+            if (val <= 2) {
+                commentContainer.classList.add('show');
+                label.innerHTML = `<span class="text-[#DA8484] font-bold mr-1">*</span> Please add a short note explaining your rating (Optional):`;
+                addBtn.classList.add('hidden');
+            } else {
+                label.innerHTML = `Additional comment (Optional):`;
+                // If text exists, keep it open; otherwise hide it and show button
+                if (responses[qId].comment.trim() === "") {
+                    commentContainer.classList.remove('show');
+                    addBtn.classList.remove('hidden');
+                }
+            }
+        };
+
+        // Handle comment inputs
+        window.handleComment = function(qId, text) {
+            responses[qId].comment = text;
+        };
+
+        // Manually show comment box
+        window.forceShowComment = function(qId) {
+            document.getElementById(`comment-container-${qId}`).classList.add('show');
+            document.getElementById(`btn-add-comment-${qId}`).classList.add('hidden');
+        };
+
+        // Initialize survey
+        renderSurvey();
+
+        // Handle form submission
+        document.getElementById('survey-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate all questions are answered
+            let hasError = false;
+            let firstErrorId = null;
+
+            for (let i = 1; i <= 20; i++) {
+                const qId = `q${i}`;
+                const container = document.getElementById(`container-${qId}`);
+                if (!responses[qId].score) {
+                    hasError = true;
+                    container.classList.add('bg-[#DA8484]/5');
+                    if (!firstErrorId) firstErrorId = qId;
+                } else {
+                    container.classList.remove('bg-[#DA8484]/5');
+                }
+            }
+
+            const errorMsg = document.getElementById('error-message');
+            if (hasError) {
+                errorMsg.classList.remove('hidden');
+                document.getElementById(`container-${firstErrorId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            // Prepare Payload
+            errorMsg.classList.add('hidden');
+            const finalComment = document.getElementById('final-comment').value;
+            const payload = {
+                responses: responses,
+                finalComment: finalComment
+            };
+
+            // Loading state
+            const submitBtn = document.getElementById('submit-btn');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+            `;
+
+            // Fetch request to GAS
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    document.getElementById('survey-form').classList.add('hidden');
+                    const successMsg = document.getElementById('success-message');
+                    successMsg.classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert("Submission Error: " + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Network Error. Please verify your connection or ensure the App Script is deployed as accessible to 'Anyone'.");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            });
+        });
+    </script>
+</body>
+</html>
