@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delphi Survey Dashboard</title>
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bar-fill {
+            transition: width 1s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-[#faf9f9] min-h-screen py-10 px-4 sm:px-6 lg:px-8 font-sans text-gray-800 selection:bg-[#DA8484] selection:text-white">
+
+    <div class="max-w-5xl mx-auto space-y-8" id="app-container">
+        
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-sm border-t-4 border-[#DA8484] overflow-hidden flex flex-col md:flex-row items-center justify-between p-8">
+            <div>
+                <h1 class="text-2xl font-light text-gray-900 mb-2 tracking-wide">
+                    Live Results Dashboard
+                </h1>
+                <p class="text-sm text-[#8B8080] font-medium">
+                    2026 Asia-Pacific Consensus on Professional Standards
+                </p>
+            </div>
+            
+            <!-- KPI Box -->
+            <div class="mt-6 md:mt-0 bg-[#DA8484]/10 border border-[#DA8484]/20 rounded-lg px-8 py-4 text-center min-w-[180px]">
+                <p class="text-xs uppercase tracking-wider text-[#DA8484] font-semibold mb-1">Total Responses</p>
+                <div id="total-responses" class="text-4xl font-light text-gray-900">--</div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="py-20 text-center">
+            <svg class="animate-spin h-10 w-10 text-[#DA8484] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-[#8B8080] tracking-wide">Fetching live data from Google Sheets...</p>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div id="dashboard-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 hidden">
+            <!-- Cards will be injected here via JavaScript -->
+        </div>
+
+    </div>
+
+    <script>
+        // Your Apps Script URL
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz7WCLYRk180Rz3qGOvzi37-gtI4eJRy3g3jiZ72e2NR8TUnTwbCMIUDSnGgRPAwMIK/exec";
+
+        // Full Questions Mapping (to display on cards)
+        const questionsMap = {
+            q1: "Visualizations must prioritize scientific and anatomical accuracy over artistic license...",
+            q2: "Key visual claims should be traceable to source evidence such as imaging, operative records...",
+            q3: "Each deliverable must be clear to its intended audience, use context, and have a specific learning objective.",
+            q4: "Visuals that bridge scales must maintain biological consistency across transitions...",
+            q5: "When data is incomplete or predictive, the visual should use explicit conceptual flags or confidence language...",
+            q6: "The choice of medium, raster, vector, 3D, animation, or interactive, must be justified...",
+            q7: "Simplification is allowed but must not introduce clinically meaningful distortion...",
+            q8: "Crisp and solid linework helps in delineating structures and is often considered more effective...",
+            q9: "Implement a standard workflow of brief approval, draft review, expert verification, and final QA.",
+            q10: "Establish file practices to prevent outdated visuals from persisting in teaching materials...",
+            q11: "Any use of generative AI or deep learning must be disclosed...",
+            q12: "Visuals must avoid color-only encoding by using redundant cues like patterns or labels...",
+            q13: "Educational visuals should represent the diverse skin tones, body types, ages, and cultural contexts...",
+            q14: "Patient-facing visuals should use plain-language labeling and rapid clarity design...",
+            q15: "Patient-derived materials (e.g. DICOM files) must be strictly anonymized...",
+            q16: "Document the tools used, including software versions and key processing steps...",
+            q17: "Disclose author contributions and any non-original assets...",
+            q18: "For visualizations serving as “Digital Twins,” the visual must clearly distinguish between patient-specific data...",
+            q19: "Immersive Diagnostics (AR/VR/XR) overlays must maintain spatial accuracy and explicitly state boundaries.",
+            q20: "Visualizations integrated into simulators should document alignment between visual cues and haptic feedback..."
+        };
+
+        // Fetch Data from Google Sheets
+        fetch(GAS_URL)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    processDashboardData(data.data, data.totalResponses);
+                } else {
+                    alert("Error loading data.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('loading-state').innerHTML = `<p class="text-[#DA8484] font-medium">Failed to connect to Google Sheets. Ensure Apps Script is updated and deployed as 'New Version'.</p>`;
+            });
+
+        function processDashboardData(responses, totalResponses) {
+            document.getElementById('total-responses').innerText = totalResponses;
+            document.getElementById('loading-state').classList.add('hidden');
+            const grid = document.getElementById('dashboard-grid');
+            grid.classList.remove('hidden');
+
+            if (totalResponses === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-[#8B8080]">No responses recorded yet. Submit a test response to see the dashboard.</div>`;
+                return;
+            }
+
+            // Calculate stats for each question (q1 to q20)
+            for (let i = 1; i <= 20; i++) {
+                const qId = "q" + i;
+                
+                // Track distribution of scores 1 through 5
+                const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+                let sum = 0;
+                let validCount = 0;
+
+                responses.forEach(row => {
+                    const score = row.scores[qId];
+                    if (score >= 1 && score <= 5) {
+                        distribution[score]++;
+                        sum += score;
+                        validCount++;
+                    }
+                });
+
+                const average = validCount > 0 ? (sum / validCount).toFixed(2) : "0.00";
+
+                // Generate Card
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between";
+                
+                // Build Distribution Bars HTML
+                let barsHtml = '';
+                [5, 4, 3, 2, 1].forEach(scoreValue => {
+                    const count = distribution[scoreValue];
+                    const percentage = validCount > 0 ? Math.round((count / validCount) * 100) : 0;
+                    
+                    barsHtml += `
+                        <div class="flex items-center text-xs text-[#8B8080] mb-2">
+                            <span class="w-8 font-medium">★ ${scoreValue}</span>
+                            <div class="flex-1 h-2 bg-gray-100 rounded-full mx-3 overflow-hidden">
+                                <div class="h-full bg-[#DA8484] bar-fill rounded-full" style="width: 0%" data-target-width="${percentage}%"></div>
+                            </div>
+                            <span class="w-8 text-right">${percentage}%</span>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-start justify-between gap-4 mb-3">
+                            <span class="px-2.5 py-1 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold tracking-wider rounded uppercase flex-shrink-0">Q${i}</span>
+                            <h3 class="text-sm font-medium text-gray-800 leading-snug">${questionsMap[qId]}</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-50 flex items-center justify-between gap-6">
+                        <div class="text-center min-w-[70px]">
+                            <p class="text-[10px] text-[#8B8080] uppercase tracking-wider mb-1">Avg Score</p>
+                            <p class="text-3xl font-light text-[#DA8484]">${average}</p>
+                        </div>
+                        <div class="flex-1">
+                            ${barsHtml}
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            }
+
+            // Animate bars after DOM insertion
+            setTimeout(() => {
+                document.querySelectorAll('.bar-fill').forEach(bar => {
+                    bar.style.width = bar.getAttribute('data-target-width');
+                });
+            }, 100);
+        }
+    </script>
+</body>
+</html>
